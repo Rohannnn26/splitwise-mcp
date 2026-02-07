@@ -12,14 +12,15 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from dotenv import load_dotenv
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 
 from splitwise_mcp.client import SplitwiseClient
 from splitwise_mcp.config import Settings
 
 # Walk up from this file to find .env at the project root
-_project_root = Path(__file__).resolve().parent.parent.parent
-load_dotenv(_project_root / ".env")
+_project_root = Path(__file__).resolve().parent.parent
+_env_path = _project_root / ".env"
+load_dotenv(_env_path if _env_path.exists() else None)
 
 logger = logging.getLogger("splitwise_mcp")
 logging.basicConfig(level=logging.INFO, stream=sys.stderr)

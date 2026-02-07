@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from mcp.server.fastmcp import Context
+from fastmcp import Context
 
 from splitwise_mcp.app import mcp
 from splitwise_mcp.client import SplitwiseAPIError
