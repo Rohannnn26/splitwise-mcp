@@ -28,13 +28,19 @@ cp .env.example .env
 
 Get an API key at [https://secure.splitwise.com/apps](https://secure.splitwise.com/apps).
 
-### 3. Test with MCP Inspector
+### 3. Test with MCP Inspector (local)
 
 ```bash
-uv run mcp dev src/splitwise_mcp/server.py
+# Test in SSE mode (default)
+npx @modelcontextprotocol/inspector uv run splitwise-mcp
+
+# Or test in stdio mode for Claude Desktop
+$env:MCP_TRANSPORT="stdio"  # On Windows
+# export MCP_TRANSPORT=stdio  # On macOS/Linux
+npx @modelcontextprotocol/inspector uv run splitwise-mcp
 ```
 
-### 4. Add to Claude Desktop
+### 4. Add to Claude Desktop (local)
 
 Add this to your `claude_desktop_config.json`:
 
@@ -45,16 +51,65 @@ Add this to your `claude_desktop_config.json`:
       "command": "uv",
       "args": [
         "--directory",
-        "C:\\Users\\Rohan Gupta\\Documents\\coding\\splitwise_mcp",
+        "C:\\Users\\Rohan Gupta\\Documents\\coding\\splitwise_mcp_server",
         "run",
         "splitwise-mcp"
-      ]
+      ],
+      "env": {
+        "MCP_TRANSPORT": "stdio"
+      }
     }
   }
 }
 ```
 
 On macOS/Linux, adjust the path accordingly.
+
+## Deploy to Render
+
+This server can be deployed to [Render](https://render.com) as a web service accessible via SSE transport.
+
+### 1. Push to GitHub
+
+Ensure your code is in a GitHub repository (`.env` is already gitignored).
+
+### 2. Create a Render Web Service
+
+1. Go to [Render Dashboard](https://dashboard.render.com/)
+2. Click **New** → **Web Service**
+3. Connect your GitHub repository
+4. Render will auto-detect the `render.yaml` configuration
+
+### 3. Set Environment Variables
+
+In Render Dashboard > Environment, add:
+- `SPLITWISE_API_KEY` - Your Splitwise API key (keep as secret)
+
+The server will automatically run in SSE mode when deployed.
+
+### 4. Connect from Claude Desktop
+
+After deployment, update your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "splitwise": {
+      "url": "https://your-app-name.onrender.com/sse"
+    }
+  }
+}
+```
+
+### Local Development
+
+For local testing with stdio transport (default for Claude Desktop):
+
+```bash
+# Set transport to stdio
+export MCP_TRANSPORT=stdio  # On Windows: $env:MCP_TRANSPORT="stdio"
+uv run splitwise-mcp
+```
 
 ## Available Tools
 
@@ -71,8 +126,9 @@ On macOS/Linux, adjust the path accordingly.
 ## Project Structure
 
 ```
-src/splitwise_mcp/
+splitwise_mcp/
 ├── server.py          # MCP server entry point (FastMCP + lifespan)
+├── app.py             # FastMCP instance + lifespan management
 ├── config.py          # Settings loaded from .env
 ├── client.py          # Async Splitwise API client (httpx)
 ├── models/            # Pydantic models for API responses

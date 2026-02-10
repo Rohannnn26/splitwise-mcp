@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: splitwise-mcp
+    runtime: python
+    plan: free
+    buildCommand: uv sync
+    startCommand: uv run splitwise-mcp
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: MCP_TRANSPORT
+        value: sse
+      - key: SPLITWISE_API_KEY
+        sync: false
+        # Set this in Render Dashboard > Environment > Secret Files
